@@ -9,10 +9,10 @@ public class ResetCommand extends NoParamsCommand{
 	}
 
 	
-	public void execute(Game game, Controller controller)
+	public boolean execute(Game game)
 	{
 		game.reset();
-		System.out.println(game.toString());
+		return true;
 	}
 
 }

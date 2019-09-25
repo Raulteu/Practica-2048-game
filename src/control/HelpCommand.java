@@ -8,9 +8,10 @@ public class HelpCommand extends NoParamsCommand{
 		super("help", "Muestra este mensaje de ayuda");
 	}
 	
-	public void execute(Game game, Controller controller)
+	public boolean execute(Game game)
 	{
 		System.out.println(game.help());
+		return false;
 	}
 
 }

@@ -1,5 +1,7 @@
 package Rules;
 
+import java.util.Random;
+
 import tp.pr1.Board;
 import tp.pr1.Cell;
 import tp.pr1.Direction;
@@ -7,14 +9,14 @@ import tp.pr1.Position;
 
 public interface GameRules{
 
-	void addNewCellAt(Board board, Position pos);
-	//que incorpora una célula con valor aleatorio en la posición pos del tablero board,
+	void addNewCellAt(Board board, Position pos, Random myRandom);
+	//que incorpora una celula con valor aleatorio en la posicion pos del tablero board,
 	
 	int merge(Cell self, Cell other);
-	//que fusiona dos células y devuelve el número de puntos obtenido por la fusión,
+	//que fusiona dos celulas y devuelve el numero de puntos obtenido por la fusion
 	
 	int getWinValue(Board board);
-	//que devuelve el mejor valor del tablero, según las reglas de ese juego, comprobándose si es un valor ganador y se ha ganado el juego,
+	//que devuelve el mejor valor del tablero, segun las reglas de ese juego, comprobandose si es un valor ganador y se ha ganado el juego,
 	
 	boolean win(Board board);
 	//que devuelve si el juego se ha ganado o no
@@ -43,26 +45,26 @@ public interface GameRules{
 		return new Board(size);
 	}
 	
-	default void addNewCell(Board board/*, Random random*/) {
+	default void addNewCell(Board board, Random myRandom) {
 	//Cuya implementacion por defecto elige una posicion libre de board e invoca el metodo addNewCellAt() para a�adir una celula en esa posicion
 		board.guardaHuecos();
 
 		//generar nueva baldosa en una posicion aleatoria(90% 2, 10% 4)
-			int aux = (int) (Math.random()*board.getContH()-1);
+			int aux = (int) (myRandom.nextDouble()*board.getContH()-1);
 			int x = board.getPosVacia(aux)/10;
 			int y = board.getPosVacia(aux)%10;
 			Position pos = new Position(x, y);
 
-			addNewCellAt(board, pos);
+			addNewCellAt(board, pos, myRandom);
 	}
 	
-	default void initBoard(Board board, int initCells/*, Random random*/) {
+	default void initBoard(Board board, int initCells, Random myRandom) {
 	//Cuya implementacion por defecto inicializa board eligiendo numCells posiciones libres,
 	//e invoca el metodo addNewCellAt() para a�adir nuevas celulas en esas posiciones.
 		int i = 0; 
 		while (i < initCells)
 		{
-			addNewCell(board);
+			addNewCell(board, myRandom);
 			i++;
 		}
 		board.guardaHuecos();

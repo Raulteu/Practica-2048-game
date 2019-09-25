@@ -1,15 +1,17 @@
 package Rules;
 
+import java.util.Random;
+
 import tp.pr1.Board;
 import tp.pr1.Cell;
 import tp.pr1.Position;
 
 public class RulesInverse implements GameRules{
 
-	public void addNewCellAt(Board board, Position pos)
+	public void addNewCellAt(Board board, Position pos, Random myRandom)
 	//que incorpora una celula con valor aleatorio en la posicion pos del tablero board,
 	{
-		int valor = (int) (Math.random()*10);
+		int valor = (int) (myRandom.nextDouble()*10);
 		if (valor == 7) {
 			board.getTablero()[pos.setFila()][pos.setColumna()].setBaldosa(1024);
 		}
@@ -75,7 +77,7 @@ public class RulesInverse implements GameRules{
 	public boolean win(Board board)
 	//que devuelve si el juego se ha ganado o no
 	{
-		if (getWinValue(board) == 2048)
+		if (getWinValue(board) == 2)
 			return true;
 		else
 			return false;

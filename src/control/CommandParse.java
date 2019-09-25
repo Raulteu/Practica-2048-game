@@ -1,24 +1,35 @@
 package control;
 
-public class CommandParse {
+import java.io.IOException;
+import Exceptions.Excepciones;
+import Exceptions.comandoDesconocido;
 
-	private static Command[ ] availableCommands = { 
+
+public class CommandParse {
+	
+	public static String excepcion = "Comando desconocido. Escribe 'help' para ver los posibles comandos.";
+
+	public static Command[ ] availableCommands = { 
 			new HelpCommand(),
 			new ResetCommand(), 
 			new ExitCommand(), 
 			new MoveCommand(null),
-			new PlayCommand(null, null)};
+			new PlayCommand(null, null),
+			new RedoCommand(),
+			new UndoCommand(),
+			new LoadCommand(null),
+			new SaveCommand(null)};
+			
 	
-	public static Command parseCommand(String[ ] commandWords, Controller controller)
+	public static Command parseCommand(String[ ] commandWords) throws Excepciones, IOException
 	{
 		Command command = null;
 		for (Command c: availableCommands) {
-				command = c.parse(commandWords, controller) ;
-			if (command != null)
-				return command;
+				command = c.parse(commandWords) ;
+		if (command != null)
+			return command;
 		}
-		
-		return command;
+		throw new comandoDesconocido(excepcion);
 	}
 	
 	

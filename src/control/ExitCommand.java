@@ -8,8 +8,9 @@ public class ExitCommand extends NoParamsCommand{
 		super("exit", "Termina el programa\"");
 	}
 	
-	public void execute(Game game, Controller controller)
+	public boolean execute(Game game)
 	{
+		return false;
 	}
 
 	

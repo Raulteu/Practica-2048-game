@@ -1,8 +1,10 @@
 package control;
 
+import java.io.IOException;
 import java.util.Scanner;
 
-//import tp.pr1.Direction;
+import Exceptions.Excepciones;
+import Exceptions.finException;
 import tp.pr1.Game;
 
 
@@ -37,7 +39,7 @@ public class Controller {
 		return this.in;
 	}
 	
-	public void run(){
+	public void run() {
 		//Muestra el estado del juego (toString de Game)
 		System.out.println(game.toString());
 		
@@ -50,18 +52,22 @@ public class Controller {
 			str = this.in.nextLine();
 			test = str.trim().split("\\s+"); 
 			test[0].toLowerCase();
-			command = CommandParse.parseCommand(test, this);
-			//Direction dir = null;
-			if (command != null) {
-				//Ejecutar command
-				command.execute(game, this);
-			} else {
-				System.out.println("Unknown Command. Use ’help’ to see the available commands");
-			}
 			
-			if (!test[0].equals("exit")) {
-				System.out.println();
-				System.out.println(game.toString());
+			try {
+				command = CommandParse.parseCommand(test);
+					if (command.execute(game)) {
+						System.out.println();
+						System.out.println(game.toString());					
+					}
+			}catch (finException ex) {
+				System.out.println(game.toString());					
+				System.out.println(ex.getMessage());
+			}
+			catch(Excepciones | IOException  unknown){
+				System.out.println(unknown.getMessage());
+			}
+			catch (ArrayIndexOutOfBoundsException ex) {
+				System.out.println("El tablero cargado no es valido.");
 			}
 			
 		} while (!this.game.getPerdido() && ((!test[0].equalsIgnoreCase("exit")) || (command == null)));

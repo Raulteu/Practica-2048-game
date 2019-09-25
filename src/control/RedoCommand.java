@@ -1,5 +1,6 @@
 package control;
 
+import Exceptions.redoException;
 import tp.pr1.Game;
 
 public class RedoCommand extends NoParamsCommand{
@@ -8,10 +9,10 @@ public class RedoCommand extends NoParamsCommand{
 		super("Redo", "Ejecuta un comando previamente realizado");
 	}
 
-	public void execute(Game game, Controller controller)
+	public boolean execute(Game game) throws redoException
 	{
-		game.redo();
-		System.out.println(game.toString());
+		return game.redo();
 	}
+
 
 }

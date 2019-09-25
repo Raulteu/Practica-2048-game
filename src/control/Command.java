@@ -1,5 +1,8 @@
 package control;
 
+import java.io.IOException;
+
+import Exceptions.Excepciones;
 import tp.pr1.Game;
 
 public abstract class Command {
@@ -16,9 +19,9 @@ public abstract class Command {
 		commandName = commandInfoWords[0];
 	}
 	
-	public abstract void execute(Game game, Controller controller);
-	public abstract Command parse(String[] commandWords, Controller controller);
-	
+	public abstract boolean execute(Game game) throws Excepciones, IOException;
+	public abstract Command parse(String[] commandWords /*, Scanner in*/) throws Excepciones, IOException ; 
+
 	public String helpText() {
 		return " " + commandText + ": " + helpText;
 	}	

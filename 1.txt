@@ -1,0 +1,8 @@
+This stores a saved 2048 game
+
+0 0 0 0
+0 0 0 0
+0 0 2 0
+0 0 2 0
+
+2 0 original

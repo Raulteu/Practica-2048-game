@@ -1,5 +1,6 @@
 package control;
 
+import Exceptions.undoException;
 import tp.pr1.Game;
 
 public class UndoCommand extends NoParamsCommand {
@@ -9,10 +10,9 @@ public class UndoCommand extends NoParamsCommand {
 	}
 
 
-	public void execute(Game game, Controller controller)
+	public boolean execute(Game game) throws undoException
 	{
-		game.undo();
-		System.out.println(game.toString());
+		return game.undo();
 	}
 
 }

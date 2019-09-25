@@ -1,28 +1,66 @@
 package tp.pr1;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Random;
+import java.io.IOException;
+
+import Exceptions.Excepciones;
+import Exceptions.fileNameInvalid;
+import Exceptions.fileNot2048;
+import Exceptions.finException;
+import Exceptions.invalidInitCells;
+import Exceptions.invalidRules;
+import Exceptions.redoException;
+import Exceptions.undoException;
+
 import Rules.GameRules;
+import control.Command;
+import control.CommandParse;
+import control.GameType;
 
 public class Game {
 	 
 	private Board board; // Tablero
 	private int currentSize; // Dimension del tablero
 	private int currentInitCells; // Numero de baldosas no nulas iniciales
-	//private Random myRandom; // Comportamiento aleatorio del juego
+	private Random myRandom; // Comportamiento aleatorio del juego
 	private MoveResults mr;
 	private boolean perdido;
 	private GameStateStack undoes = new GameStateStack();
 	private GameStateStack redoes = new GameStateStack();
 	private GameRules currentRules;
 	
-	public Game(GameRules rules, int size, int initCells) {
+	public static String undoE = "No se puede deshacer el movimiento";
+	public static String redoE = "No se puede des-deshacer el movimiento";
+	public static String loseE = "Juego terminado. HAS PERDIDO.";
+	public static String winE = "Juego terminado. ENHORABUENA, HAS GANADO.";
+	public static String invCic = "El numero de celdas iniciales del archivo no es valido";
+	public static String  invR = "El tipo de juego guardado no es valido, se mantendran las reglas actuales.";
+
+
+	
+	public Game(GameRules rules, int size, int initCells, Random myRandom) {
 		
 		currentRules = rules;
 		currentSize = size;
 		currentInitCells = initCells;
-		//this.myRandom = myRandom;
+		this.myRandom = myRandom;
 		this.perdido = false;
 		board = rules.createBoard(currentSize);
-		rules.initBoard(board, currentInitCells);
+		rules.initBoard(board, currentInitCells, myRandom);
+		this.mr = new MoveResults(true, 0, 0);
+	}
+	
+	public void play(GameRules rules, int size, int initCells, Random myRandom) {
+		this.currentInitCells = initCells;
+		this.currentRules = rules;
+		this.currentSize = size;
+		this.board = rules.createBoard(size);
+		rules.initBoard(this.board, initCells, myRandom);
 		this.mr = new MoveResults(true, 0, 0);
 	}
 	
@@ -31,7 +69,7 @@ public class Game {
 		return this.mr;
 	}
 	
-	public void move(Direction dir) {
+	public void move(Direction dir) throws finException {
 		int maxpuntos = mr.getMaxToken();
 		undoes.push(getState());
 		int puntos = mr.getPoints();
@@ -40,18 +78,18 @@ public class Game {
 		if (maxpuntos > mr.getMaxToken())
 			this.mr.setMaxToken(maxpuntos);
 		if (this.mr.getMoved() == true) {		
-			currentRules.addNewCell(board);
+			currentRules.addNewCell(board, myRandom);
 			}
 		board.guardaHuecos();
 
 		//Comprobamos si se ha perdido
 		if (currentRules.lose(board, currentSize) == true) {
 			this.perdido = true;
-			System.out.println("Has perdido");
+			throw new finException(loseE);
 		}
 		if (currentRules.win(board) == true)
 		{
-			System.out.println("Enhorabuen, has ganado! :)");
+			throw new finException(winE);
 		}
 	
 		
@@ -74,50 +112,45 @@ public class Game {
 		int i = 0;
 		while(i < currentInitCells)
 		{	
-			currentRules.addNewCell(board);
+			currentRules.addNewCell(board, myRandom);
 			i++;	
 		}
 		board.guardaHuecos();
 	}
 	
 	public String help() {
-		String str = "Move <direction>: execute a move in one of the four directions (up, down, left, right) \n"
-				+ "Play: cambia el modo de juego (FIB, INV o ORIG)\n"
-				+ "Reset: start a new game \n"
-				+ "Help: print this help message \n"
-				+ "Exit: finish the program";
+		String str = "";
+		for (Command c : CommandParse.availableCommands) {
+			str = str + "\n" + c.helpText();
+			
+		}
 		return str;
 	}
 
 	@Override
 	public String toString() {
-
-		
 		return board.toString() + "\n" + "Mejor Puntuacion: " +  currentRules.getWinValue(board) + "  Puntos: " + mr.getPoints() + "\n";
-
 	}
 
 	
-	public void undo(){
+	public boolean undo() throws undoException{
 		if(undoes.getContGS() > 0){
 			redoes.push(getState());
 			setState(undoes.pop());	
-			
+			return true;
 		}
-		else{
-			System.out.println("No se puede deshacer el movimiento");
-		}
+		else
+			throw new undoException(undoE);
 	}
 	
-	public void redo(){
+	public boolean redo() throws redoException{
 		if(redoes.getContGS() > 0){
 			undoes.push(getState());
 			setState(redoes.pop());	
-		
+			return true;
 		}
-		else{
-			System.out.println("No se puede des-deshacer el movimiento");
-		}
+		else
+			throw new redoException(redoE);
 	}
 	
 
@@ -139,5 +172,79 @@ public class Game {
 		}
 	}
 
+//Guardado y Carga de Archivos
+	
+	public GameRules getRules() {
+		return currentRules;
+	}
+	
+	public void load(String nombre, FileReader fr, BufferedReader entrada) throws fileNot2048, IOException, ArrayIndexOutOfBoundsException, Excepciones{
+		
+		Board board2 = board.load(nombre, fr, entrada);
+		String[] ipr = entrada.readLine().split(" ");
+		int cica = Integer.parseInt( ipr[0]);
+		int pointsaux = (Integer.parseInt(ipr[1]));
+		
+		if (cica < board2.getTamano()* board2.getTamano())
+		{
+			switch (ipr[2]) {
+			case "original":
+				this.board = board2;
+				this.mr.setPoints(pointsaux);
+				currentInitCells = cica;
+				currentRules = GameType.ORIG.getRules();
+				break;
+			case "fib":
+				this.board = board2;
+				this.mr.setPoints(pointsaux);
+				currentInitCells = cica;
+				currentRules = GameType.FIB.getRules();
+				break;
+			case "inverse":
+				this.board = board2;
+				this.mr.setPoints(pointsaux);
+				currentInitCells = cica;
+				currentRules = GameType.INVERSE.getRules();
+				break;
+			default:
+				throw new invalidRules(invR);	
+			}
+		}
+		else
+		{
+			throw new invalidInitCells(invCic);
+		}
+				
 
+		
+			undoes = new GameStateStack();
+			redoes = new GameStateStack();
+		entrada.close();
+		
+}
+	
+	public void store (String nombre) throws fileNameInvalid, IOException{
+		
+		String rules = null;
+		
+		FileWriter fw = new FileWriter(nombre,true);
+		BufferedWriter buffer = new BufferedWriter(fw);
+		PrintWriter salida = new PrintWriter(buffer);
+		
+		board.store(nombre);
+		rules = currentRules.toString();
+			
+			if (rules.contains("Rules2048"))
+				rules = "original";
+			else if (rules.contains("RulesFib"))
+				rules = "fib";
+			else if (rules.contains("RulesInverse"))
+				rules = "inverse";
+		
+		salida.println(currentInitCells + " " + mr.getPoints() + " "+ rules);
+		salida.close();
+	}
+	public Game getGame() {
+		return this;
+	}
 }

@@ -1,6 +1,16 @@
 package tp.pr1;
-import java.lang.String;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
+import java.io.IOException;
+import Exceptions.fileNot2048;
+import Exceptions.tableroCargadoNoValido;
+
+import java.lang.String;
 import Rules.GameRules;
 
 
@@ -10,6 +20,8 @@ public class Board {
 	private int [ ][ ] _boardState;
 	private int []huecos;
 	private int contH ;
+	
+	public static String tableroE = "El tablero cargado no es valido";
 	
 	public Board copyBoard(Board board) {
 		Board aux = new Board(_boardSize);
@@ -343,6 +355,64 @@ public class Board {
 			}
 			return min;
 		}
+
+
+// Guarda y cargar de Archivos
+		
+		public void store(String nombre) throws IOException {
+			FileWriter fw = new FileWriter(nombre);
+			BufferedWriter buffer = new BufferedWriter(fw);
+			PrintWriter salida = new PrintWriter(buffer);
+			
+			salida.println("This stores a saved 2048 game");
+			salida.println();
+			 for (int i = 0; i < _boardSize ; i++) {
+				for (int j = 0; j < _boardSize; j++) {
+					salida.print(_board[i][j].getBaldosa() + " ");
+				}
+				salida.println();
+			}
+			 salida.println();
+		
+			salida.close();
+		}
+
+	public Board load(String nombre,  FileReader fr, BufferedReader entrada) throws  fileNot2048, IOException, ArrayIndexOutOfBoundsException, tableroCargadoNoValido {
+		int nulos = 0;
+		String s = null;
+		 {
+			while(nulos < 2) {
+				s = entrada.readLine();
+				if (s.equals("")) {
+					nulos++;
+				}
+				else {
+					String[] aux = s.split(" ");
+					Board juegoCargado = new Board(aux.length);
+					for (int i = 0; i < juegoCargado._boardSize; i++) {
+						int b = 0;
+						for (int j = 0; j < juegoCargado._boardSize; j++) {
+							Position pos = new Position(j,i);
+							juegoCargado.setCell(pos, Integer.parseInt(aux[b]));
+							
+							b++;
+						}	
+						s = entrada.readLine();
+						aux =s.split(" ");
+					}
+					if ((aux.length > 0) && (!aux[0].equals("")))
+						throw new tableroCargadoNoValido(tableroE);
+					return juegoCargado;
+				}
+			}
+			entrada.close();	
+		}
+		return null;
+	}
+	
+	public int getTamano() {
+		return _boardSize;
+	}
 }
 
 

@@ -7,4 +7,3 @@ public enum Direction {
 	Direction dir;
 	
 }
-// Direction

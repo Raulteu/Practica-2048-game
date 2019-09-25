@@ -5,12 +5,6 @@ public class MoveResults {
 	private boolean moved; //para identificar si ha habido movimiento o fusion de baldosas
 	private int points;//para almacenar el numero de puntos obtenidos en el movimiento
 	private int maxToken;//para llevar el valor mas alto tras el movimiento 
-	/*
-	public static void main(String[] args) {
-		MoveResults m = new MoveResults(true, 0, 0);
-		System.out.println(m.moved + " " + m.points + " " + m.maxToken);
-	}*/
-	
 	
 	public MoveResults (boolean moved, int points, int maxToken)
 	{
